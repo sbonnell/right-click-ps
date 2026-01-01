@@ -337,8 +337,8 @@
       "description": "Create ScriptParser to extract block comment metadata from .ps1 files. Parse @Field: Value pairs using regex. Handle missing fields with defaults.",
       "files": ["src/RightClickPS/Scripts/ScriptParser.cs"],
       "dependencies": [4],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 6,
@@ -357,8 +357,8 @@
       "description": "Create ScriptExecutor to run PowerShell scripts. Build command with $SelectedFiles array variable. Handle admin elevation by re-launching with runas. Show MessageBox on errors.",
       "files": ["src/RightClickPS/Scripts/ScriptExecutor.cs"],
       "dependencies": [4],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 8,
