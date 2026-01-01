@@ -1,7 +1,7 @@
 {
-  "menuName": "PowerShell Scripts",
+  "menuName": "Stu Helpers",
   "scriptsPath": "./ExampleScripts",
   "systemScriptsPath": "./SystemScripts",
   "maxDepth": 3,
-  "iconPath": null
+  "iconPath": "./stu-icon.ico"
 }

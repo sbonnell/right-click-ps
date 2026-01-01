@@ -8,6 +8,7 @@ namespace RightClickPS.Config;
 public class ConfigLoader
 {
     private const string ConfigFileName = "config.json";
+    private const string ResourceFolderName = "RightClickPS";
 
     private static readonly JsonSerializerOptions JsonOptions = new()
     {
@@ -17,7 +18,7 @@ public class ConfigLoader
     };
 
     /// <summary>
-    /// Loads configuration from config.json in the application directory.
+    /// Loads configuration from config.json in the RightClickPS resource folder.
     /// Returns sensible defaults if the file doesn't exist.
     /// </summary>
     /// <returns>The loaded and validated AppConfig.</returns>
@@ -63,13 +64,57 @@ public class ConfigLoader
     }
 
     /// <summary>
-    /// Gets the path to the config file in the application directory.
+    /// Gets the path to the config file in the RightClickPS resource folder.
+    /// Looks in the RightClickPS subfolder relative to the exe location.
+    /// Falls back to the exe directory for backwards compatibility.
     /// </summary>
     /// <returns>The full path to config.json.</returns>
     public static string GetConfigPath()
     {
-        var appDirectory = AppContext.BaseDirectory;
-        return Path.Combine(appDirectory, ConfigFileName);
+        var exeDirectory = GetExeDirectory();
+
+        // First, try RightClickPS subfolder (new structure)
+        var resourceFolder = Path.Combine(exeDirectory, ResourceFolderName);
+        var configInSubfolder = Path.Combine(resourceFolder, ConfigFileName);
+        if (File.Exists(configInSubfolder))
+        {
+            return configInSubfolder;
+        }
+
+        // Fall back to exe directory (old structure / development)
+        return Path.Combine(exeDirectory, ConfigFileName);
+    }
+
+    /// <summary>
+    /// Gets the directory containing the executable.
+    /// </summary>
+    /// <returns>The exe directory path.</returns>
+    public static string GetExeDirectory()
+    {
+        // Use the process path to get the actual exe location
+        var exePath = Environment.ProcessPath;
+        if (!string.IsNullOrEmpty(exePath))
+        {
+            return Path.GetDirectoryName(exePath) ?? AppContext.BaseDirectory;
+        }
+        return AppContext.BaseDirectory;
+    }
+
+    /// <summary>
+    /// Gets the path to the RightClickPS resource folder.
+    /// </summary>
+    /// <returns>The resource folder path.</returns>
+    public static string GetResourceFolder()
+    {
+        var exeDirectory = GetExeDirectory();
+        var resourceFolder = Path.Combine(exeDirectory, ResourceFolderName);
+
+        // Return subfolder if it exists, otherwise exe directory
+        if (Directory.Exists(resourceFolder))
+        {
+            return resourceFolder;
+        }
+        return exeDirectory;
     }
 
     /// <summary>

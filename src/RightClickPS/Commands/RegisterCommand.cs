@@ -103,7 +103,11 @@ public class RegisterCommand
             // Step 4: Register context menu
             WriteInfo("");
             WriteInfo("Registering context menu...");
-            var result = _contextMenuRegistry.Register(menuRoot, config.MenuName, exePath);
+            if (!string.IsNullOrEmpty(config.IconPath))
+            {
+                WriteInfo($"  Icon path: {config.IconPath}");
+            }
+            var result = _contextMenuRegistry.Register(menuRoot, config.MenuName, exePath, config.IconPath);
 
             if (!result.Success)
             {

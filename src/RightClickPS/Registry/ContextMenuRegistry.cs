@@ -46,8 +46,9 @@ public class ContextMenuRegistry
     /// <param name="root">The root menu node containing the hierarchy to register.</param>
     /// <param name="menuName">The display name for the root context menu.</param>
     /// <param name="exePath">The full path to the RightClickPS executable.</param>
+    /// <param name="iconPath">Optional path to an icon file for the root menu.</param>
     /// <returns>A <see cref="RegistrationResult"/> indicating success or failure.</returns>
-    public RegistrationResult Register(MenuNode root, string menuName, string exePath)
+    public RegistrationResult Register(MenuNode root, string menuName, string exePath, string? iconPath = null)
     {
         if (root == null)
         {
@@ -89,7 +90,8 @@ public class ContextMenuRegistry
                 menuName,
                 exePath,
                 RegistryConstants.FilesAppPath,
-                isForFiles: true);
+                isForFiles: true,
+                iconPath);
 
             // Register for directories
             result.DirectoryMenuItemCount = RegisterForContext(
@@ -97,7 +99,8 @@ public class ContextMenuRegistry
                 menuName,
                 exePath,
                 RegistryConstants.DirectoryAppPath,
-                isForFiles: false);
+                isForFiles: false,
+                iconPath);
 
             return result;
         }
@@ -119,8 +122,9 @@ public class ContextMenuRegistry
     /// <param name="exePath">The path to the executable.</param>
     /// <param name="rootKeyPath">The registry path for the root key.</param>
     /// <param name="isForFiles">True if registering for files, false for directories.</param>
+    /// <param name="iconPath">Optional path to an icon file.</param>
     /// <returns>The number of menu items registered.</returns>
-    private int RegisterForContext(MenuNode root, string menuName, string exePath, string rootKeyPath, bool isForFiles)
+    private int RegisterForContext(MenuNode root, string menuName, string exePath, string rootKeyPath, bool isForFiles, string? iconPath)
     {
         // Filter children based on target type
         var filteredRoot = FilterMenuNodes(root, isForFiles);
@@ -142,6 +146,12 @@ public class ContextMenuRegistry
         // Set the root menu display name and indicate it has subcommands
         rootKey.SetValue(RegistryConstants.MUIVerbValueName, menuName);
         rootKey.SetValue(RegistryConstants.SubCommandsValueName, string.Empty);
+
+        // Set icon if provided
+        if (!string.IsNullOrEmpty(iconPath) && File.Exists(iconPath))
+        {
+            rootKey.SetValue(RegistryConstants.IconValueName, iconPath);
+        }
 
         // Create shell subkey for child items
         using var shellKey = rootKey.CreateSubKey(RegistryConstants.ShellSubKeyName);
