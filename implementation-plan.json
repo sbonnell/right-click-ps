@@ -480,8 +480,8 @@
       "description": "Build app, run register command, verify context menu appears, test script execution with sample files, test unregister.",
       "files": [],
       "dependencies": [13, 14, 15, 16, 17, 18],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 20,
