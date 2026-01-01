@@ -297,8 +297,8 @@
       "description": "Initialize .NET 8 solution with console app project and xUnit test project. Create folder structure for source files. Test project references main project.",
       "files": ["RightClickPS.sln", "src/RightClickPS/RightClickPS.csproj", "tests/RightClickPS.Tests/RightClickPS.Tests.csproj"],
       "dependencies": [],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 2,
