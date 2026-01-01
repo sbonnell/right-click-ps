@@ -51,8 +51,32 @@ Scripts use block comment headers:
 
 ```bash
 dotnet build src/RightClickPS/RightClickPS.csproj
-dotnet publish src/RightClickPS/RightClickPS.csproj -c Release -r win-x64
+dotnet publish src/RightClickPS/RightClickPS.csproj -c Release -r win-x64 -o publish
 ```
+
+## Building the Installer
+
+Requires [Inno Setup 6](https://jrsoftware.org/isdl.php) to be installed.
+
+```powershell
+# Build installer (publishes app and compiles installer)
+.\installer\build-installer.ps1
+
+# Skip dotnet publish (use existing publish folder)
+.\installer\build-installer.ps1 -SkipBuild
+
+# Build self-contained installer (includes .NET runtime, larger file)
+.\installer\build-installer.ps1 -SelfContained
+```
+
+Output: `dist\RightClickPS-Setup-1.0.0.exe`
+
+### Installer Features
+- Installs to Program Files
+- Copies Scripts folder with system and example scripts
+- Automatically registers context menu after install
+- Automatically unregisters context menu before uninstall
+- Optional: Disable Windows 11 "Show more options" (restores classic context menu)
 
 ## CLI Usage
 

@@ -140,16 +140,12 @@ public class RegisterCommand
         // Prefer Environment.ProcessPath as it returns the actual .exe
         var location = Environment.ProcessPath;
 
-        // Fallback to entry assembly location
+        // Fallback to AppContext.BaseDirectory (works in single-file apps)
         if (string.IsNullOrEmpty(location))
         {
-            location = Assembly.GetEntryAssembly()?.Location;
-        }
-
-        // Final fallback to executing assembly
-        if (string.IsNullOrEmpty(location))
-        {
-            location = Assembly.GetExecutingAssembly().Location;
+            var baseDir = AppContext.BaseDirectory;
+            var exeName = Assembly.GetEntryAssembly()?.GetName().Name + ".exe";
+            location = Path.Combine(baseDir, exeName ?? "RightClickPS.exe");
         }
 
         // Ensure we have a valid path

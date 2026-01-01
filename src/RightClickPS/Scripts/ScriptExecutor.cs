@@ -206,11 +206,13 @@ public class ScriptExecutor
             return processPath;
         }
 
-        // Fallback: use the entry assembly location
+        // Fallback: use AppContext.BaseDirectory (works in single-file apps)
         var assembly = System.Reflection.Assembly.GetEntryAssembly();
         if (assembly != null)
         {
-            return assembly.Location;
+            var baseDir = AppContext.BaseDirectory;
+            var exeName = assembly.GetName().Name + ".exe";
+            return Path.Combine(baseDir, exeName);
         }
 
         // Final fallback: use current process main module

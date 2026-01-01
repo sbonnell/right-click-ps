@@ -40,7 +40,9 @@
       "Bash(git -C 'D:\\\\ai\\\\right-click-ps' add CLAUDE.md implementation-plan.json)",
       "Bash(git -C 'D:\\\\ai\\\\right-click-ps' commit -m \"$\\(cat <<''EOF''\nTask 20: Update CLAUDE.md with build and usage instructions\n\n- Added help command to CLI usage section\n- Verified all documentation is accurate and complete:\n  - Build commands documented\n  - CLI usage documented with all 4 commands\n  - Script metadata format documented\n  - Architecture overview documented\n  - Configuration documented\n  - Registry paths documented\n\nCompletes: Task 20\nDependencies: Task 19\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git -C 'D:\\\\ai\\\\right-click-ps' merge feature/task-20-documentation)",
-      "Bash(git -C:*)"
+      "Bash(git -C:*)",
+      "Bash(powershell -Command \"& ''D:\\\\ai\\\\right-click-ps\\\\RightClickPS.exe'' execute ''D:\\\\ai\\\\right-click-ps\\\\RightClickPS\\\\Scripts\\\\PDF\\\\Split PDF.ps1'' ''C:\\\\temp\\\\pdftest\\\\Combined_20260101_212825.pdf''\")",
+      "Bash(powershell:*)"
     ]
   }
 }

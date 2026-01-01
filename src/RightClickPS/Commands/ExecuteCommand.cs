@@ -2,6 +2,8 @@ using RightClickPS.Scripts;
 
 namespace RightClickPS.Commands;
 
+// BatchCollector is used from RightClickPS.Scripts namespace
+
 /// <summary>
 /// Command to execute a PowerShell script with provided file paths.
 /// This command is invoked from the context menu via registry entries.
@@ -77,6 +79,23 @@ public class ExecuteCommand
         // Extract file paths from remaining arguments
         var filePaths = args.Skip(1).ToList();
 
+        // When Windows Explorer invokes the context menu on multiple selected files,
+        // it calls our command once per file. Use BatchCollector to gather all files
+        // from parallel invocations and execute the script once with all of them.
+        if (filePaths.Count == 1)
+        {
+            using var batchCollector = CreateBatchCollector(scriptPath);
+            var (shouldExecute, allFiles) = batchCollector.AddFileAndWait(filePaths[0]);
+
+            if (!shouldExecute)
+            {
+                // Another process will execute the script with all files
+                return 0;
+            }
+
+            filePaths = allFiles;
+        }
+
         try
         {
             // Parse script metadata to check for RunAsAdmin requirement
@@ -101,6 +120,17 @@ public class ExecuteCommand
             ShowError($"Failed to execute script: {ex.Message}");
             return -1;
         }
+    }
+
+    /// <summary>
+    /// Creates a BatchCollector for the specified script.
+    /// Virtual to allow overriding in tests.
+    /// </summary>
+    /// <param name="scriptPath">The path to the script.</param>
+    /// <returns>A new BatchCollector instance.</returns>
+    protected virtual BatchCollector CreateBatchCollector(string scriptPath)
+    {
+        return new BatchCollector(scriptPath);
     }
 
     /// <summary>

@@ -218,6 +218,9 @@ public class ContextMenuRegistry
             // This is a script - create the command entry
             var command = BuildCommand(exePath, node.Script.FilePath);
 
+            // Enable multi-select: tells Windows to invoke command once with all files
+            nodeKey.SetValue("MultiSelectModel", "Player");
+
             using var commandKey = nodeKey.CreateSubKey(RegistryConstants.CommandSubKeyName);
             if (commandKey != null)
             {

@@ -15,7 +15,9 @@ dotnet publish "$srcDir\src\RightClickPS\RightClickPS.csproj" -c Release -o $tem
 
 # Create resource directory
 Write-Host "  Creating folder structure..." -ForegroundColor Gray
-if (Test-Path $resourceDir) { Remove-Item $resourceDir -Recurse -Force }
+if (Test-Path $resourceDir) {
+    Remove-Item $resourceDir -Recurse -Force -ErrorAction SilentlyContinue
+}
 New-Item -ItemType Directory -Path $resourceDir -Force | Out-Null
 
 # Copy exe to root
@@ -31,6 +33,22 @@ Write-Host "  Copying resources..." -ForegroundColor Gray
 Copy-Item "$srcDir\config.json" $resourceDir -Force
 if (Test-Path "$srcDir\Scripts") {
     Copy-Item "$srcDir\Scripts" "$resourceDir\Scripts" -Recurse -Force
+}
+
+# Copy lib folder (for PDF scripts)
+if (Test-Path "$srcDir\lib\PdfSharp.dll") {
+    Write-Host "  Copying lib folder..." -ForegroundColor Gray
+    New-Item -ItemType Directory -Path "$resourceDir\lib" -Force -ErrorAction SilentlyContinue | Out-Null
+    # Copy each file individually, skip if locked
+    Get-ChildItem "$srcDir\lib" -File | ForEach-Object {
+        try {
+            Copy-Item $_.FullName "$resourceDir\lib\" -Force -ErrorAction Stop
+        } catch {
+            Write-Host "    Skipping locked file: $($_.Name)" -ForegroundColor Yellow
+        }
+    }
+} else {
+    Write-Host "  Skipping lib folder (PdfSharp.dll not found)" -ForegroundColor Yellow
 }
 
 # Copy icon files
