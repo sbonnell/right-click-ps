@@ -7,7 +7,9 @@ namespace RightClickPS.Tests.Commands;
 
 /// <summary>
 /// Unit tests for <see cref="RegisterCommand"/>.
+/// The Collection attribute ensures these tests don't run in parallel with other registry tests.
 /// </summary>
+[Collection("RegistryTests")]
 public class RegisterCommandTests : IDisposable
 {
     private readonly ContextMenuRegistry _registry;

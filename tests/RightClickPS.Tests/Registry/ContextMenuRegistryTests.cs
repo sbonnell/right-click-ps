@@ -7,7 +7,9 @@ namespace RightClickPS.Tests.Registry;
 /// Unit tests for <see cref="ContextMenuRegistry"/>.
 /// Note: These tests focus on logic that doesn't require actual registry access.
 /// Integration tests that modify the registry should be run manually with caution.
+/// The Collection attribute ensures these tests don't run in parallel with other registry tests.
 /// </summary>
+[Collection("RegistryTests")]
 public class ContextMenuRegistryTests
 {
     #region BuildCommand Tests

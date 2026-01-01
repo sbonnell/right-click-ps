@@ -397,8 +397,8 @@
       "description": "Create UnregisterCommand to remove all RightClickPS registry entries from both files and folders contexts.",
       "files": ["src/RightClickPS/Commands/UnregisterCommand.cs"],
       "dependencies": [9],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 12,
