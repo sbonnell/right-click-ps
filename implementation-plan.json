@@ -407,8 +407,8 @@
       "description": "Create ExecuteCommand to run a script with provided file paths. Parse args, load script metadata, handle elevation, invoke ScriptExecutor, handle errors.",
       "files": ["src/RightClickPS/Commands/ExecuteCommand.cs"],
       "dependencies": [5, 7],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 13,
