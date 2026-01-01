@@ -387,8 +387,8 @@
       "description": "Create RegisterCommand that orchestrates: load config, discover scripts, clear old entries, create new registry entries. Report success/failure.",
       "files": ["src/RightClickPS/Commands/RegisterCommand.cs"],
       "dependencies": [6, 9],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 11,
