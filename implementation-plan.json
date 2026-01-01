@@ -427,8 +427,8 @@
       "description": "Create PowerShell script that invokes RightClickPS.exe register to refresh context menu entries.",
       "files": ["SystemScripts/_System/Refresh Menus.ps1"],
       "dependencies": [13],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 15,
