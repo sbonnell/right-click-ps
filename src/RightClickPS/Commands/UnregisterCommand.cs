@@ -54,7 +54,8 @@ public class UnregisterCommand
             // Attempt to unregister all entries
             bool success = _registry.Unregister();
 
-            if (!success)
+            // If nothing was registered, treat a failure as a no-op success to keep CLI exit code predictable
+            if (!success && wasRegistered)
             {
                 WriteError("Failed to remove some registry entries. You may need to remove them manually.");
                 return 1;

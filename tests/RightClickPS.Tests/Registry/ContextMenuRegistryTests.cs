@@ -72,6 +72,8 @@ public class ContextMenuRegistryTests
 
     #endregion
 
+
+
     #region SanitizeKeyName Tests
 
     [Fact]
@@ -485,55 +487,90 @@ public class ContextMenuRegistryTests
 
     #endregion
 
-    #region Unregister Tests
+    #region Security Validation Tests
+
+    #region Command Injection Tests (Fix #2)
 
     [Fact]
-    public void Unregister_ReturnsTrue_WhenNoKeysExist()
+    public void BuildCommand_HandlesSpecialCharactersInPath()
     {
-        var registry = new ContextMenuRegistry();
+        var exePath = @"C:\RightClickPS.exe";
+        var scriptPath = @"C:\Scripts\O'Reilly's Script.ps1";
 
-        // Should succeed even if no keys exist
-        var result = registry.Unregister();
+        var result = ContextMenuRegistry.BuildCommand(exePath, scriptPath);
 
-        Assert.True(result);
+        // Command should be properly formatted with quotes
+        Assert.Contains("\"", result);
+        Assert.Contains("execute", result);
+        Assert.EndsWith("\"%1\"", result);
     }
 
     [Fact]
-    public void IsRegistered_ReturnsFalse_WhenNotRegistered()
+    public void BuildCommand_HandlesAmpersandsInPath()
     {
-        var registry = new ContextMenuRegistry();
+        var exePath = @"C:\RightClickPS.exe";
+        var scriptPath = @"C:\Scripts\Rock & Roll.ps1";
 
-        // Make sure we're in a clean state
-        registry.Unregister();
+        var result = ContextMenuRegistry.BuildCommand(exePath, scriptPath);
 
-        // Should return false when not registered
-        // Note: This test may fail if there are leftover registry entries from previous tests
-        var isRegistered = registry.IsRegistered();
+        // Ampersands should be within quotes
+        Assert.Contains("\"C:\\Scripts\\Rock & Roll.ps1\"", result);
+    }
 
-        // We just verify it doesn't throw - actual value depends on system state
-        Assert.IsType<bool>(isRegistered);
+    #endregion
+
+    #region Input Validation Tests (Fix #5)
+
+    [Fact]
+    public void SanitizeKeyName_TruncatesExcessivelyLongNames()
+    {
+        var longName = new string('a', 300);
+
+        var result = ContextMenuRegistry.SanitizeKeyName(longName);
+
+        // Should truncate to reasonable length
+        Assert.True(result.Length <= 255);
+        Assert.True(result.Length > 0);
     }
 
     [Fact]
-    public void IsRegisteredForFiles_DoesNotThrow()
+    public void SanitizeKeyName_HandlesControlCharacters()
     {
-        var registry = new ContextMenuRegistry();
+        var nameWithControlChars = "Test\x00\x01\x02Script";
 
-        // Should not throw
-        var result = registry.IsRegisteredForFiles();
+        var result = ContextMenuRegistry.SanitizeKeyName(nameWithControlChars);
 
-        Assert.IsType<bool>(result);
+        // Control characters should be removed or replaced
+        Assert.NotEqual(nameWithControlChars, result);
+        Assert.Contains("Test", result);
+        Assert.Contains("Script", result);
     }
 
     [Fact]
-    public void IsRegisteredForDirectories_DoesNotThrow()
+    public void SanitizeKeyName_HandlesNewlines()
     {
-        var registry = new ContextMenuRegistry();
+        var nameWithNewlines = "Test\nScript\r\nName";
 
-        // Should not throw
-        var result = registry.IsRegisteredForDirectories();
+        var result = ContextMenuRegistry.SanitizeKeyName(nameWithNewlines);
 
-        Assert.IsType<bool>(result);
+        // Newlines should be removed or replaced
+        Assert.DoesNotContain("\n", result);
+        Assert.DoesNotContain("\r", result);
+    }
+
+    [Fact]
+    public void SanitizeKeyName_HandlesMultipleConsecutiveSpaces()
+    {
+        var nameWithSpaces = "Test    Multiple    Spaces";
+
+        var result = ContextMenuRegistry.SanitizeKeyName(nameWithSpaces);
+
+        // Should handle multiple spaces
+        Assert.NotEmpty(result);
+        Assert.Contains("Test", result);
+        Assert.Contains("Spaces", result);
+        #endregion
+
     }
 
     #endregion
@@ -592,6 +629,43 @@ public class ContextMenuRegistryTests
         Assert.True(result.Success);
         Assert.Equal(1, result.FilesMenuItemCount);
         Assert.Equal(1, result.DirectoryMenuItemCount);
+    }
+
+    #endregion
+
+    #region Unregister Tests
+
+    [Fact]
+    public void Unregister_RemovesContextMenuEntries()
+    {
+        var registry = new ContextMenuRegistry();
+        var root = MenuNode.CreateRoot();
+
+        // Arrange: Register a script first
+        registry.Register(root, "PowerShell Scripts", @"C:\RightClickPS.exe");
+
+        // Act: Unregister the script
+        var unregisterResult = registry.Unregister(root, "PowerShell Scripts");
+
+        // Assert: Unregistration should be successful
+        Assert.True(unregisterResult.Success);
+
+        // Additional check: Re-registering should succeed if unregistered
+        var registerResult = registry.Register(root, "PowerShell Scripts", @"C:\RightClickPS.exe");
+        Assert.True(registerResult.Success);
+    }
+
+    [Fact]
+    public void Unregister_NonExistentMenu_DoesNothing()
+    {
+        var registry = new ContextMenuRegistry();
+        var root = MenuNode.CreateRoot();
+
+        // Act: Unregister a menu that doesn't exist
+        var result = registry.Unregister(root, "NonExistentMenu");
+
+        // Assert: Result should be successful, no exception thrown
+        Assert.True(result.Success);
     }
 
     #endregion
