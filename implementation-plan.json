@@ -457,8 +457,8 @@
       "description": "Create sample config.json with default values and comments explaining each field.",
       "files": ["config.json"],
       "dependencies": [2],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 18,
