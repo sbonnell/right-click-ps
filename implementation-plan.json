@@ -1,4 +1,5 @@
 {
+  "_AGENT_WARNING": "DO NOT ADD, REMOVE, OR ALTER TASKS. Only 'completed' and 'tested' fields may be changed. If a task seems wrong, STOP and report - do not modify.",
   "projectName": "RightClickPS",
   "description": "Windows context menu extension that executes PowerShell scripts on selected files/folders",
   "targetFramework": "net8.0-windows",
@@ -98,6 +99,24 @@
           "Registry/ContextMenuRegistry.cs",
           "Registry/RegistryConstants.cs",
           "RightClickPS.csproj"
+        ]
+      }
+    },
+    "tests/": {
+      "RightClickPS.Tests/": {
+        "description": "xUnit test project",
+        "files": [
+          "RightClickPS.Tests.csproj",
+          "Config/AppConfigTests.cs",
+          "Config/ConfigLoaderTests.cs",
+          "Scripts/ScriptMetadataTests.cs",
+          "Scripts/ScriptParserTests.cs",
+          "Scripts/ScriptDiscoveryTests.cs",
+          "Scripts/ScriptExecutorTests.cs",
+          "Registry/ContextMenuRegistryTests.cs",
+          "Commands/RegisterCommandTests.cs",
+          "Commands/UnregisterCommandTests.cs",
+          "Commands/ExecuteCommandTests.cs"
         ]
       }
     },
@@ -275,8 +294,8 @@
       "id": 1,
       "phase": "Setup",
       "title": "Create solution and project structure",
-      "description": "Initialize .NET 8 solution with console app project, create folder structure for source files",
-      "files": ["RightClickPS.sln", "src/RightClickPS/RightClickPS.csproj"],
+      "description": "Initialize .NET 8 solution with console app project and xUnit test project. Create folder structure for source files. Test project references main project.",
+      "files": ["RightClickPS.sln", "src/RightClickPS/RightClickPS.csproj", "tests/RightClickPS.Tests/RightClickPS.Tests.csproj"],
       "dependencies": [],
       "completed": false,
       "tested": false
@@ -475,6 +494,73 @@
       "tested": false
     }
   ],
+
+  "agentWorkflow": {
+    "description": "Each task is completed by an agent following this workflow",
+    "input": [
+      "CLAUDE.md",
+      "implementation-plan.json",
+      "Assigned task ID"
+    ],
+    "preImplementation": {
+      "step1": "Check implementation-plan.json - verify all dependency tasks have completed: true",
+      "step2": "Verify files from dependency tasks exist in codebase",
+      "step3": "Run dotnet build to confirm existing code compiles",
+      "onFailure": "STOP and report which prerequisites are incomplete"
+    },
+    "gitWorkflow": {
+      "branchNaming": "feature/task-{id}-{short-description}",
+      "createBranch": "git checkout -b feature/task-{id}-{short-description}",
+      "commitFormat": "Task {id}: {title}\n\n- {implementation details}\n- {design decisions}\n- {files created/modified}\n\nCompletes: Task {id}\nDependencies: Tasks {dependency IDs}",
+      "merge": "Merge to main after all tests pass"
+    },
+    "testing": {
+      "framework": "xUnit",
+      "requirement": "Each task must include unit tests",
+      "preMerge": "All tests (existing + new) must pass",
+      "testProject": "tests/RightClickPS.Tests/RightClickPS.Tests.csproj"
+    },
+    "postImplementation": [
+      "Update ONLY completed and tested fields in implementation-plan.json",
+      "Run dotnet test (full suite)",
+      "Merge branch to main",
+      "Delete feature branch"
+    ],
+    "CRITICAL_PLAN_INTEGRITY": {
+      "WARNING": "AGENTS MUST NOT MODIFY THIS FILE EXCEPT FOR STATUS FLAGS",
+      "readOnlyFields": [
+        "id",
+        "phase",
+        "title",
+        "description",
+        "files",
+        "dependencies"
+      ],
+      "writableFields": [
+        "completed",
+        "tested"
+      ],
+      "prohibitedActions": [
+        "Adding new tasks",
+        "Removing existing tasks",
+        "Changing task IDs",
+        "Modifying task titles",
+        "Altering task descriptions",
+        "Changing file lists",
+        "Modifying dependencies",
+        "Reordering tasks",
+        "Changing phase names",
+        "Altering ANY field except completed and tested"
+      ],
+      "onPlanIssue": "If agent believes a task is incorrect or incomplete, STOP and report the issue. DO NOT modify the plan.",
+      "rationale": [
+        "Plan was designed holistically with inter-task dependencies",
+        "Changing one task breaks assumptions in dependent tasks",
+        "Other agents rely on plan being stable and predictable",
+        "Task IDs are used in git branches and commit messages"
+      ]
+    }
+  },
 
   "buildCommands": {
     "build": "dotnet build src/RightClickPS/RightClickPS.csproj",
