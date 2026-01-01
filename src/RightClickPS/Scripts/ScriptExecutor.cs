@@ -127,12 +127,13 @@ public class ScriptExecutor
             File.WriteAllText(tempScript, wrapperContent);
 
             // Use -STA for Single-Threaded Apartment mode required by Windows Forms
+            // Use -WindowStyle Hidden to hide the PowerShell console (dialogs still show)
             var startInfo = new ProcessStartInfo
             {
                 FileName = _powershellPath,
-                Arguments = $"-NoProfile -STA -ExecutionPolicy Bypass -File \"{tempScript}\"",
+                Arguments = $"-NoProfile -STA -WindowStyle Hidden -ExecutionPolicy Bypass -File \"{tempScript}\"",
                 UseShellExecute = true,
-                CreateNoWindow = false
+                CreateNoWindow = true
             };
 
             using var process = new Process { StartInfo = startInfo };

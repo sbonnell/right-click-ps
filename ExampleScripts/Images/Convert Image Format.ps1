@@ -31,7 +31,7 @@ $formats = @{
 # Create format selection dialog
 $form = New-Object System.Windows.Forms.Form
 $form.Text = 'Convert Image Format'
-$form.Size = New-Object System.Drawing.Size(320, 220)
+$form.ClientSize = New-Object System.Drawing.Size(300, 200)
 $form.StartPosition = 'CenterScreen'
 $form.FormBorderStyle = 'FixedDialog'
 $form.MaximizeBox = $false
@@ -39,14 +39,14 @@ $form.MinimizeBox = $false
 $form.TopMost = $true
 
 $label = New-Object System.Windows.Forms.Label
-$label.Location = New-Object System.Drawing.Point(20, 20)
-$label.Size = New-Object System.Drawing.Size(260, 20)
+$label.Location = New-Object System.Drawing.Point(15, 15)
+$label.Size = New-Object System.Drawing.Size(270, 20)
 $label.Text = "Select output format for $($SelectedFiles.Count) file(s):"
 $form.Controls.Add($label)
 
 $listBox = New-Object System.Windows.Forms.ListBox
-$listBox.Location = New-Object System.Drawing.Point(20, 45)
-$listBox.Size = New-Object System.Drawing.Size(260, 80)
+$listBox.Location = New-Object System.Drawing.Point(15, 40)
+$listBox.Size = New-Object System.Drawing.Size(270, 70)
 $listBox.SelectionMode = 'One'
 foreach ($fmt in $formats.Keys | Sort-Object) {
     $listBox.Items.Add($fmt) | Out-Null
@@ -56,14 +56,14 @@ $form.Controls.Add($listBox)
 
 # Quality slider for JPEG
 $qualityLabel = New-Object System.Windows.Forms.Label
-$qualityLabel.Location = New-Object System.Drawing.Point(20, 130)
-$qualityLabel.Size = New-Object System.Drawing.Size(120, 20)
+$qualityLabel.Location = New-Object System.Drawing.Point(15, 118)
+$qualityLabel.Size = New-Object System.Drawing.Size(110, 20)
 $qualityLabel.Text = 'JPEG Quality: 90%'
 $form.Controls.Add($qualityLabel)
 
 $qualityTrack = New-Object System.Windows.Forms.TrackBar
-$qualityTrack.Location = New-Object System.Drawing.Point(140, 125)
-$qualityTrack.Size = New-Object System.Drawing.Size(140, 30)
+$qualityTrack.Location = New-Object System.Drawing.Point(125, 115)
+$qualityTrack.Size = New-Object System.Drawing.Size(160, 30)
 $qualityTrack.Minimum = 10
 $qualityTrack.Maximum = 100
 $qualityTrack.Value = 90
@@ -74,16 +74,16 @@ $qualityTrack.Add_ValueChanged({
 $form.Controls.Add($qualityTrack)
 
 $okButton = New-Object System.Windows.Forms.Button
-$okButton.Location = New-Object System.Drawing.Point(100, 155)
-$okButton.Size = New-Object System.Drawing.Size(75, 25)
+$okButton.Location = New-Object System.Drawing.Point(110, 160)
+$okButton.Size = New-Object System.Drawing.Size(80, 28)
 $okButton.Text = 'Convert'
 $okButton.DialogResult = [System.Windows.Forms.DialogResult]::OK
 $form.AcceptButton = $okButton
 $form.Controls.Add($okButton)
 
 $cancelButton = New-Object System.Windows.Forms.Button
-$cancelButton.Location = New-Object System.Drawing.Point(185, 155)
-$cancelButton.Size = New-Object System.Drawing.Size(75, 25)
+$cancelButton.Location = New-Object System.Drawing.Point(200, 160)
+$cancelButton.Size = New-Object System.Drawing.Size(80, 28)
 $cancelButton.Text = 'Cancel'
 $cancelButton.DialogResult = [System.Windows.Forms.DialogResult]::Cancel
 $form.CancelButton = $cancelButton
