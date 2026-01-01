@@ -307,8 +307,8 @@
       "description": "Create AppConfig class with properties for menuName, scriptsPath, systemScriptsPath, maxDepth, iconPath. Use System.Text.Json attributes for serialization.",
       "files": ["src/RightClickPS/Config/AppConfig.cs"],
       "dependencies": [1],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 3,
