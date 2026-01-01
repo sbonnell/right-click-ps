@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init:*)",
+      "Bash(git checkout:*)",
+      "Bash(dotnet new:*)",
+      "Bash(dotnet sln:*)",
+      "Bash(dotnet add:*)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nTask 1: Create solution and project structure\n\n- Initialize .NET 8 solution with RightClickPS.sln\n- Create console app project \\(src/RightClickPS\\) targeting net8.0-windows\n- Create xUnit test project \\(tests/RightClickPS.Tests\\) targeting net8.0-windows\n- Add project reference from test project to main project\n- Create folder structure: Commands, Config, Scripts, Registry in both projects\n- Add .gitignore for .NET projects\n- Add SolutionStructureTests.cs to verify project references work\n\nCompletes: Task 1\nDependencies: None\n\n🤖 Generated with [Claude Code]\\(https://claude.com/claude-code\\)\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git merge:*)",
+      "Bash(git branch:*)",
+      "Bash(git commit:*)",
+      "Bash(dir /b)",
+      "Bash(dir:*)"
+    ]
+  }
+}
