@@ -1,6 +1,6 @@
 {
   "menuName": "PowerShell Scripts",
-  "scriptsPath": "C:\\Scripts",
+  "scriptsPath": "./ExampleScripts",
   "systemScriptsPath": "./SystemScripts",
   "maxDepth": 3,
   "iconPath": null

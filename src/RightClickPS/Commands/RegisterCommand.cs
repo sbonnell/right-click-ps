@@ -135,17 +135,16 @@ public class RegisterCommand
     /// <returns>The full path to the executable.</returns>
     protected virtual string GetExecutablePath()
     {
-        // Get the entry assembly location
-        var location = Assembly.GetEntryAssembly()?.Location;
+        // Prefer Environment.ProcessPath as it returns the actual .exe
+        var location = Environment.ProcessPath;
 
-        // If running as a single-file executable, Location may be empty
-        // In that case, use the process path
+        // Fallback to entry assembly location
         if (string.IsNullOrEmpty(location))
         {
-            location = Environment.ProcessPath;
+            location = Assembly.GetEntryAssembly()?.Location;
         }
 
-        // If we still don't have a location, fall back to the executing assembly
+        // Final fallback to executing assembly
         if (string.IsNullOrEmpty(location))
         {
             location = Assembly.GetExecutingAssembly().Location;
@@ -155,6 +154,16 @@ public class RegisterCommand
         if (string.IsNullOrEmpty(location))
         {
             throw new InvalidOperationException("Unable to determine executable path.");
+        }
+
+        // If we got a .dll path, try to find the corresponding .exe
+        if (location.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+        {
+            var exePath = Path.ChangeExtension(location, ".exe");
+            if (File.Exists(exePath))
+            {
+                return exePath;
+            }
         }
 
         return location;

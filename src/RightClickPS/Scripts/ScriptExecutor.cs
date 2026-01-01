@@ -116,51 +116,36 @@ public class ScriptExecutor
     /// </summary>
     private int ExecuteDirect(string scriptPath, List<string> selectedFiles)
     {
-        var command = BuildPowerShellCommand(scriptPath, selectedFiles);
+        // Create a temp wrapper script that sets up $SelectedFiles and calls the actual script
+        // This avoids escaping issues with -Command and ensures Windows Forms work properly
+        var tempScript = Path.Combine(Path.GetTempPath(), $"RightClickPS_{Guid.NewGuid():N}.ps1");
 
-        var startInfo = new ProcessStartInfo
+        try
         {
-            FileName = _powershellPath,
-            Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{EscapeCommandLineArgument(command)}\"",
-            UseShellExecute = false,
-            CreateNoWindow = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true
-        };
+            var filesArray = BuildSelectedFilesArray(selectedFiles);
+            var wrapperContent = $"$SelectedFiles = {filesArray}\r\n& '{EscapeForPowerShell(scriptPath)}'";
+            File.WriteAllText(tempScript, wrapperContent);
 
-        using var process = new Process { StartInfo = startInfo };
-
-        var outputBuilder = new StringBuilder();
-        var errorBuilder = new StringBuilder();
-
-        process.OutputDataReceived += (sender, e) =>
-        {
-            if (e.Data != null)
+            // Use -STA for Single-Threaded Apartment mode required by Windows Forms
+            var startInfo = new ProcessStartInfo
             {
-                outputBuilder.AppendLine(e.Data);
-            }
-        };
+                FileName = _powershellPath,
+                Arguments = $"-NoProfile -STA -ExecutionPolicy Bypass -File \"{tempScript}\"",
+                UseShellExecute = true,
+                CreateNoWindow = false
+            };
 
-        process.ErrorDataReceived += (sender, e) =>
-        {
-            if (e.Data != null)
-            {
-                errorBuilder.AppendLine(e.Data);
-            }
-        };
+            using var process = new Process { StartInfo = startInfo };
+            process.Start();
+            process.WaitForExit();
 
-        process.Start();
-        process.BeginOutputReadLine();
-        process.BeginErrorReadLine();
-        process.WaitForExit();
-
-        // If there were errors and the exit code indicates failure, show them
-        if (process.ExitCode != 0 && errorBuilder.Length > 0)
-        {
-            ShowError($"Script execution failed (exit code {process.ExitCode}):\n{errorBuilder}");
+            return process.ExitCode;
         }
-
-        return process.ExitCode;
+        finally
+        {
+            // Clean up temp script
+            try { File.Delete(tempScript); } catch { }
+        }
     }
 
     /// <summary>
