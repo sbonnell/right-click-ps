@@ -347,8 +347,8 @@
       "description": "Create ScriptDiscovery to recursively scan folders for .ps1 files up to maxDepth. Build hierarchical MenuNode structure (folders and scripts). Merge system and user scripts.",
       "files": ["src/RightClickPS/Scripts/ScriptDiscovery.cs"],
       "dependencies": [3, 5],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 7,
