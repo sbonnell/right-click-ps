@@ -327,8 +327,8 @@
       "description": "Create ScriptMetadata class with properties: Name, Description, Extensions (list), TargetType (enum: Files/Folders/Both), RunAsAdmin, FilePath, RelativePath.",
       "files": ["src/RightClickPS/Scripts/ScriptMetadata.cs"],
       "dependencies": [1],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 5,
