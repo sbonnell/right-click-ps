@@ -367,8 +367,8 @@
       "description": "Define constants for registry paths: HKCU\\Software\\Classes\\*\\shell and HKCU\\Software\\Classes\\Directory\\shell. Define app-specific key name.",
       "files": ["src/RightClickPS/Registry/RegistryConstants.cs"],
       "dependencies": [1],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 9,
