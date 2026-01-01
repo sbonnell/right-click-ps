@@ -417,8 +417,8 @@
       "description": "Create Program.cs with Main method. Parse command line args to route to register/unregister/execute/help commands. Handle errors gracefully.",
       "files": ["src/RightClickPS/Program.cs"],
       "dependencies": [10, 11, 12],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 14,
