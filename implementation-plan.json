@@ -1,0 +1,506 @@
+{
+  "projectName": "RightClickPS",
+  "description": "Windows context menu extension that executes PowerShell scripts on selected files/folders",
+  "targetFramework": "net8.0-windows",
+  "architecture": "Cascading registry menus with launcher executable",
+
+  "designDecisions": {
+    "framework": ".NET 8 Windows",
+    "menuImplementation": "Cascading registry entries",
+    "filePassingMode": "$SelectedFiles array variable",
+    "metadataFormat": "Block comment header in .ps1 files",
+    "errorDisplay": "MessageBox",
+    "configLocation": "App directory (config.json)",
+    "menuTargets": ["Files", "Folders"],
+    "menuName": "Configurable via config.json",
+    "elevationSupport": "Per-script via @RunAsAdmin metadata",
+    "systemFunctions": "Implemented as scripts in system scripts folder"
+  },
+
+  "configuration": {
+    "fileName": "config.json",
+    "schema": {
+      "menuName": {
+        "type": "string",
+        "description": "Root context menu display name",
+        "default": "PowerShell Scripts"
+      },
+      "scriptsPath": {
+        "type": "string",
+        "description": "Path to user scripts repository folder"
+      },
+      "systemScriptsPath": {
+        "type": "string",
+        "description": "Path to built-in system scripts (relative to app)",
+        "default": "./SystemScripts"
+      },
+      "maxDepth": {
+        "type": "integer",
+        "description": "Maximum folder depth for submenu generation",
+        "default": 3
+      },
+      "iconPath": {
+        "type": "string",
+        "description": "Optional path to icon for root menu item",
+        "default": null
+      }
+    }
+  },
+
+  "scriptMetadataFormat": {
+    "format": "Block comment at start of .ps1 file",
+    "example": "<#\n@Name: Convert to JPG\n@Description: Converts PNG images to JPEG format\n@Extensions: .png,.bmp,.gif\n@TargetType: Files\n@RunAsAdmin: false\n#>",
+    "fields": {
+      "@Name": {
+        "required": false,
+        "default": "Filename without extension",
+        "description": "Display name in context menu"
+      },
+      "@Description": {
+        "required": false,
+        "default": null,
+        "description": "Tooltip text (future use)"
+      },
+      "@Extensions": {
+        "required": false,
+        "default": "*",
+        "description": "Comma-separated file extensions (.png,.jpg) or * for all"
+      },
+      "@TargetType": {
+        "required": false,
+        "default": "Both",
+        "description": "Files, Folders, or Both"
+      },
+      "@RunAsAdmin": {
+        "required": false,
+        "default": false,
+        "description": "Whether to run with elevated privileges"
+      }
+    }
+  },
+
+  "solutionStructure": {
+    "RightClickPS.sln": "Solution file",
+    "src/": {
+      "RightClickPS/": {
+        "description": "Main console application",
+        "files": [
+          "Program.cs",
+          "Commands/RegisterCommand.cs",
+          "Commands/UnregisterCommand.cs",
+          "Commands/ExecuteCommand.cs",
+          "Config/AppConfig.cs",
+          "Config/ConfigLoader.cs",
+          "Scripts/ScriptMetadata.cs",
+          "Scripts/ScriptParser.cs",
+          "Scripts/ScriptDiscovery.cs",
+          "Scripts/ScriptExecutor.cs",
+          "Registry/ContextMenuRegistry.cs",
+          "Registry/RegistryConstants.cs",
+          "RightClickPS.csproj"
+        ]
+      }
+    },
+    "SystemScripts/": {
+      "description": "Built-in system scripts",
+      "files": [
+        "_System/Refresh Menus.ps1",
+        "_System/Open Scripts Folder.ps1",
+        "_System/Open Config.ps1"
+      ]
+    }
+  },
+
+  "components": {
+    "Program": {
+      "responsibility": "CLI entry point with command routing",
+      "commands": {
+        "register": "Scans scripts folder, creates registry entries",
+        "unregister": "Removes all registry entries",
+        "execute": "Runs a specific script with provided file paths",
+        "help": "Shows usage information"
+      },
+      "invocation": {
+        "register": "RightClickPS.exe register",
+        "unregister": "RightClickPS.exe unregister",
+        "execute": "RightClickPS.exe execute \"<script-path>\" \"<file1>\" \"<file2>\" ..."
+      }
+    },
+
+    "ConfigLoader": {
+      "responsibility": "Load and validate config.json",
+      "features": [
+        "Load from app directory",
+        "Validate required fields",
+        "Provide defaults for optional fields",
+        "Expand environment variables in paths"
+      ]
+    },
+
+    "ScriptDiscovery": {
+      "responsibility": "Scan scripts folder and build menu structure",
+      "features": [
+        "Recursive folder scanning up to maxDepth",
+        "Filter .ps1 files",
+        "Build hierarchical menu structure from folder layout",
+        "Merge system scripts with user scripts"
+      ]
+    },
+
+    "ScriptParser": {
+      "responsibility": "Parse script metadata from block comments",
+      "features": [
+        "Extract metadata block from script header",
+        "Parse @Field: Value pairs",
+        "Provide defaults for missing fields",
+        "Handle encoding (UTF-8 with BOM support)"
+      ]
+    },
+
+    "ScriptExecutor": {
+      "responsibility": "Execute PowerShell scripts",
+      "features": [
+        "Build PowerShell command with $SelectedFiles variable",
+        "Handle admin elevation via UAC",
+        "Capture and display errors via MessageBox",
+        "Support for hidden or visible console window"
+      ]
+    },
+
+    "ContextMenuRegistry": {
+      "responsibility": "Manage Windows registry entries for context menus",
+      "features": [
+        "Create cascading menu structure",
+        "Register for files (*) and folders (Directory)",
+        "Set menu item commands pointing to exe",
+        "Clean removal of all entries on unregister"
+      ],
+      "registryPaths": {
+        "files": "HKEY_CURRENT_USER\\Software\\Classes\\*\\shell\\RightClickPS",
+        "folders": "HKEY_CURRENT_USER\\Software\\Classes\\Directory\\shell\\RightClickPS"
+      }
+    }
+  },
+
+  "systemScripts": {
+    "_System/Refresh Menus.ps1": {
+      "purpose": "Re-scan scripts folder and update registry entries",
+      "implementation": "Invokes RightClickPS.exe register",
+      "metadata": {
+        "@Name": "Refresh Menus",
+        "@Extensions": "*",
+        "@TargetType": "Both",
+        "@RunAsAdmin": false
+      }
+    },
+    "_System/Open Scripts Folder.ps1": {
+      "purpose": "Opens the user's scripts folder in Explorer",
+      "implementation": "Reads config.json and opens scriptsPath in explorer.exe",
+      "metadata": {
+        "@Name": "Open Scripts Folder",
+        "@Extensions": "*",
+        "@TargetType": "Both",
+        "@RunAsAdmin": false
+      }
+    },
+    "_System/Open Config.ps1": {
+      "purpose": "Opens config.json in default text editor",
+      "implementation": "Opens config.json with Start-Process",
+      "metadata": {
+        "@Name": "Edit Configuration",
+        "@Extensions": "*",
+        "@TargetType": "Both",
+        "@RunAsAdmin": false
+      }
+    }
+  },
+
+  "executionFlow": {
+    "registration": [
+      "1. Load config.json from app directory",
+      "2. Validate scriptsPath exists",
+      "3. Scan scriptsPath recursively up to maxDepth",
+      "4. Scan systemScriptsPath for system scripts",
+      "5. Parse metadata from each .ps1 file",
+      "6. Build menu hierarchy (folders = submenus, scripts = items)",
+      "7. Remove existing registry entries (clean slate)",
+      "8. Create cascading registry entries for files and folders",
+      "9. Report success/failure count"
+    ],
+    "scriptExecution": [
+      "1. Parse command line: execute <script-path> <files...>",
+      "2. Load script metadata to check @RunAsAdmin",
+      "3. Build $SelectedFiles array from arguments",
+      "4. If @RunAsAdmin, re-launch self with runas verb",
+      "5. Execute PowerShell with script and $SelectedFiles",
+      "6. On error, show MessageBox with error details",
+      "7. Exit with appropriate code"
+    ]
+  },
+
+  "registryStructure": {
+    "description": "Cascading context menu via registry",
+    "example": {
+      "HKCU\\Software\\Classes\\*\\shell\\RightClickPS": {
+        "MUIVerb": "PowerShell Scripts",
+        "SubCommands": "",
+        "shell": {
+          "Images": {
+            "MUIVerb": "Images",
+            "SubCommands": "",
+            "shell": {
+              "ConvertToJPG": {
+                "MUIVerb": "Convert to JPG",
+                "command": "\"C:\\path\\RightClickPS.exe\" execute \"C:\\scripts\\Images\\Convert.ps1\" \"%1\""
+              }
+            }
+          },
+          "_System": {
+            "MUIVerb": "System",
+            "SubCommands": "",
+            "shell": {
+              "Refresh": {
+                "MUIVerb": "Refresh Menus",
+                "command": "\"C:\\path\\RightClickPS.exe\" execute \"C:\\path\\SystemScripts\\_System\\Refresh Menus.ps1\" \"%1\""
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "tasks": [
+    {
+      "id": 1,
+      "phase": "Setup",
+      "title": "Create solution and project structure",
+      "description": "Initialize .NET 8 solution with console app project, create folder structure for source files",
+      "files": ["RightClickPS.sln", "src/RightClickPS/RightClickPS.csproj"],
+      "dependencies": [],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 2,
+      "phase": "Configuration",
+      "title": "Implement AppConfig model",
+      "description": "Create AppConfig class with properties for menuName, scriptsPath, systemScriptsPath, maxDepth, iconPath. Use System.Text.Json attributes for serialization.",
+      "files": ["src/RightClickPS/Config/AppConfig.cs"],
+      "dependencies": [1],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 3,
+      "phase": "Configuration",
+      "title": "Implement ConfigLoader",
+      "description": "Create ConfigLoader to read and validate config.json from app directory. Expand environment variables in paths. Provide sensible defaults.",
+      "files": ["src/RightClickPS/Config/ConfigLoader.cs"],
+      "dependencies": [2],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 4,
+      "phase": "Scripts",
+      "title": "Implement ScriptMetadata model",
+      "description": "Create ScriptMetadata class with properties: Name, Description, Extensions (list), TargetType (enum: Files/Folders/Both), RunAsAdmin, FilePath, RelativePath.",
+      "files": ["src/RightClickPS/Scripts/ScriptMetadata.cs"],
+      "dependencies": [1],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 5,
+      "phase": "Scripts",
+      "title": "Implement ScriptParser",
+      "description": "Create ScriptParser to extract block comment metadata from .ps1 files. Parse @Field: Value pairs using regex. Handle missing fields with defaults.",
+      "files": ["src/RightClickPS/Scripts/ScriptParser.cs"],
+      "dependencies": [4],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 6,
+      "phase": "Scripts",
+      "title": "Implement ScriptDiscovery",
+      "description": "Create ScriptDiscovery to recursively scan folders for .ps1 files up to maxDepth. Build hierarchical MenuNode structure (folders and scripts). Merge system and user scripts.",
+      "files": ["src/RightClickPS/Scripts/ScriptDiscovery.cs"],
+      "dependencies": [3, 5],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 7,
+      "phase": "Scripts",
+      "title": "Implement ScriptExecutor",
+      "description": "Create ScriptExecutor to run PowerShell scripts. Build command with $SelectedFiles array variable. Handle admin elevation by re-launching with runas. Show MessageBox on errors.",
+      "files": ["src/RightClickPS/Scripts/ScriptExecutor.cs"],
+      "dependencies": [4],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 8,
+      "phase": "Registry",
+      "title": "Implement RegistryConstants",
+      "description": "Define constants for registry paths: HKCU\\Software\\Classes\\*\\shell and HKCU\\Software\\Classes\\Directory\\shell. Define app-specific key name.",
+      "files": ["src/RightClickPS/Registry/RegistryConstants.cs"],
+      "dependencies": [1],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 9,
+      "phase": "Registry",
+      "title": "Implement ContextMenuRegistry",
+      "description": "Create ContextMenuRegistry to create/delete cascading menu registry entries. Build hierarchical submenus from MenuNode structure. Handle both files and folders registration.",
+      "files": ["src/RightClickPS/Registry/ContextMenuRegistry.cs"],
+      "dependencies": [6, 8],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 10,
+      "phase": "Commands",
+      "title": "Implement RegisterCommand",
+      "description": "Create RegisterCommand that orchestrates: load config, discover scripts, clear old entries, create new registry entries. Report success/failure.",
+      "files": ["src/RightClickPS/Commands/RegisterCommand.cs"],
+      "dependencies": [6, 9],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 11,
+      "phase": "Commands",
+      "title": "Implement UnregisterCommand",
+      "description": "Create UnregisterCommand to remove all RightClickPS registry entries from both files and folders contexts.",
+      "files": ["src/RightClickPS/Commands/UnregisterCommand.cs"],
+      "dependencies": [9],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 12,
+      "phase": "Commands",
+      "title": "Implement ExecuteCommand",
+      "description": "Create ExecuteCommand to run a script with provided file paths. Parse args, load script metadata, handle elevation, invoke ScriptExecutor, handle errors.",
+      "files": ["src/RightClickPS/Commands/ExecuteCommand.cs"],
+      "dependencies": [5, 7],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 13,
+      "phase": "CLI",
+      "title": "Implement Program entry point",
+      "description": "Create Program.cs with Main method. Parse command line args to route to register/unregister/execute/help commands. Handle errors gracefully.",
+      "files": ["src/RightClickPS/Program.cs"],
+      "dependencies": [10, 11, 12],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 14,
+      "phase": "SystemScripts",
+      "title": "Create Refresh Menus system script",
+      "description": "Create PowerShell script that invokes RightClickPS.exe register to refresh context menu entries.",
+      "files": ["SystemScripts/_System/Refresh Menus.ps1"],
+      "dependencies": [13],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 15,
+      "phase": "SystemScripts",
+      "title": "Create Open Scripts Folder system script",
+      "description": "Create PowerShell script that reads config.json and opens scriptsPath in Windows Explorer.",
+      "files": ["SystemScripts/_System/Open Scripts Folder.ps1"],
+      "dependencies": [2],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 16,
+      "phase": "SystemScripts",
+      "title": "Create Edit Configuration system script",
+      "description": "Create PowerShell script that opens config.json in the default text editor.",
+      "files": ["SystemScripts/_System/Open Config.ps1"],
+      "dependencies": [2],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 17,
+      "phase": "Configuration",
+      "title": "Create default config.json template",
+      "description": "Create sample config.json with default values and comments explaining each field.",
+      "files": ["config.json"],
+      "dependencies": [2],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 18,
+      "phase": "Examples",
+      "title": "Create example user scripts",
+      "description": "Create sample scripts folder with example scripts demonstrating metadata format and common operations.",
+      "files": [
+        "ExampleScripts/Images/Convert to JPG.ps1",
+        "ExampleScripts/Files/Copy Path.ps1"
+      ],
+      "dependencies": [5],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 19,
+      "phase": "Testing",
+      "title": "Manual integration testing",
+      "description": "Build app, run register command, verify context menu appears, test script execution with sample files, test unregister.",
+      "files": [],
+      "dependencies": [13, 14, 15, 16, 17, 18],
+      "completed": false,
+      "tested": false
+    },
+    {
+      "id": 20,
+      "phase": "Documentation",
+      "title": "Update CLAUDE.md with build and usage instructions",
+      "description": "Document build commands, CLI usage, script metadata format, and architecture overview.",
+      "files": ["CLAUDE.md"],
+      "dependencies": [19],
+      "completed": false,
+      "tested": false
+    }
+  ],
+
+  "buildCommands": {
+    "build": "dotnet build src/RightClickPS/RightClickPS.csproj",
+    "publish": "dotnet publish src/RightClickPS/RightClickPS.csproj -c Release -r win-x64 --self-contained false",
+    "publishSelfContained": "dotnet publish src/RightClickPS/RightClickPS.csproj -c Release -r win-x64 --self-contained true"
+  },
+
+  "externalDependencies": {
+    "nugetPackages": [],
+    "note": "No external NuGet packages required. Uses only .NET 8 BCL: System.Text.Json, Microsoft.Win32.Registry, System.Diagnostics.Process"
+  },
+
+  "securityConsiderations": [
+    "Scripts run with current user privileges by default",
+    "Admin elevation requires explicit @RunAsAdmin metadata",
+    "Registry entries use HKCU (no admin required for registration)",
+    "File paths are quoted to prevent command injection",
+    "Scripts folder should be in a trusted location"
+  ],
+
+  "futureEnhancements": [
+    "Icon support for menu items",
+    "Script parameters/prompts before execution",
+    "Background script execution option",
+    "Script output capture and display",
+    "Multiple scripts folders support",
+    "Per-script keyboard shortcuts"
+  ]
+}
