@@ -138,29 +138,22 @@ public class ScriptDiscovery
     }
 
     /// <summary>
-    /// Discovers scripts from user and system script paths and builds a hierarchical menu structure.
+    /// Discovers scripts from the scripts folder and builds a hierarchical menu structure.
     /// </summary>
-    /// <param name="scriptsPath">The path to user scripts folder. Can be null if no user scripts.</param>
-    /// <param name="systemScriptsPath">The path to system scripts folder. Can be null if no system scripts.</param>
+    /// <param name="scriptsPath">The path to the scripts folder.</param>
     /// <param name="maxDepth">Maximum folder depth to scan (1 = only root level scripts).</param>
     /// <returns>The root <see cref="MenuNode"/> containing the complete menu hierarchy.</returns>
-    public MenuNode DiscoverScripts(string? scriptsPath, string? systemScriptsPath, int maxDepth)
+    public MenuNode DiscoverScripts(string scriptsPath, int maxDepth)
     {
         var root = MenuNode.CreateRoot();
 
         // Ensure maxDepth is at least 1
         maxDepth = Math.Max(1, maxDepth);
 
-        // Scan user scripts
+        // Scan scripts folder
         if (!string.IsNullOrEmpty(scriptsPath) && Directory.Exists(scriptsPath))
         {
             ScanDirectory(scriptsPath, scriptsPath, root, maxDepth, currentDepth: 0);
-        }
-
-        // Scan system scripts and place them in a "_System" submenu
-        if (!string.IsNullOrEmpty(systemScriptsPath) && Directory.Exists(systemScriptsPath))
-        {
-            ScanSystemScripts(systemScriptsPath, root, maxDepth);
         }
 
         // Sort all children recursively
@@ -239,71 +232,6 @@ public class ScriptDiscovery
             catch (IOException)
             {
                 // Skip directories with I/O issues
-            }
-        }
-    }
-
-    /// <summary>
-    /// Scans system scripts directory and adds them to a "_System" submenu.
-    /// </summary>
-    /// <param name="systemScriptsPath">The path to system scripts folder.</param>
-    /// <param name="root">The root menu node.</param>
-    /// <param name="maxDepth">Maximum folder depth to scan.</param>
-    private void ScanSystemScripts(string systemScriptsPath, MenuNode root, int maxDepth)
-    {
-        // Create a temporary node to scan into
-        var tempNode = MenuNode.CreateRoot();
-        ScanDirectory(systemScriptsPath, systemScriptsPath, tempNode, maxDepth, currentDepth: 0);
-
-        // If we found any scripts, merge them into root
-        // The _System folder from the file system becomes the _System submenu
-        foreach (var child in tempNode.Children)
-        {
-            // Check if this is the _System folder or any other folder/script from system scripts
-            var existingChild = root.Children.FirstOrDefault(c =>
-                c.Name.Equals(child.Name, StringComparison.OrdinalIgnoreCase) && c.Script == null);
-
-            if (existingChild != null && child.Script == null)
-            {
-                // Merge children from the scanned folder into existing folder
-                MergeNodes(existingChild, child);
-            }
-            else
-            {
-                // Add the node directly
-                root.Children.Add(child);
-            }
-        }
-    }
-
-    /// <summary>
-    /// Merges the children from source node into target node.
-    /// </summary>
-    /// <param name="target">The target node to merge into.</param>
-    /// <param name="source">The source node to merge from.</param>
-    private static void MergeNodes(MenuNode target, MenuNode source)
-    {
-        foreach (var child in source.Children)
-        {
-            if (child.IsScript)
-            {
-                // Add scripts directly
-                target.Children.Add(child);
-            }
-            else
-            {
-                // For folders, find or create and recurse
-                var existingFolder = target.Children.FirstOrDefault(c =>
-                    c.Script == null && c.Name.Equals(child.Name, StringComparison.OrdinalIgnoreCase));
-
-                if (existingFolder != null)
-                {
-                    MergeNodes(existingFolder, child);
-                }
-                else
-                {
-                    target.Children.Add(child);
-                }
             }
         }
     }

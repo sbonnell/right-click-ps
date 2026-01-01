@@ -40,7 +40,6 @@ public class ConfigLoaderTests : IDisposable
         {
             "menuName": "My Scripts",
             "scriptsPath": "{{scriptsDir.Replace("\\", "\\\\")}}",
-            "systemScriptsPath": "./System",
             "maxDepth": 5,
             "iconPath": null
         }
@@ -124,8 +123,7 @@ public class ConfigLoaderTests : IDisposable
 
         // Assert
         Assert.Equal("PowerShell Scripts", config.MenuName);
-        Assert.Null(config.ScriptsPath);
-        Assert.Equal("./SystemScripts", config.SystemScriptsPath);
+        Assert.Equal("./Scripts", config.ScriptsPath);
         Assert.Equal(3, config.MaxDepth);
         Assert.Null(config.IconPath);
     }
@@ -204,41 +202,12 @@ public class ConfigLoaderTests : IDisposable
     }
 
     [Fact]
-    public void LoadFromPath_ExpandsEnvironmentVariablesInSystemScriptsPath()
-    {
-        // Arrange
-        var testEnvVar = "RIGHTCLICKPS_SYSTEM_PATH";
-        var testPath = Path.Combine(_testDirectory, "SystemExpanded");
-        Directory.CreateDirectory(testPath);
-
-        Environment.SetEnvironmentVariable(testEnvVar, testPath);
-        try
-        {
-            var json = $$"""
-            {
-                "systemScriptsPath": "%{{testEnvVar}}%"
-            }
-            """;
-            File.WriteAllText(_testConfigPath, json);
-
-            var loader = new ConfigLoader();
-
-            // Act
-            var config = loader.LoadFromPath(_testConfigPath);
-
-            // Assert
-            Assert.Equal(testPath, config.SystemScriptsPath);
-        }
-        finally
-        {
-            Environment.SetEnvironmentVariable(testEnvVar, null);
-        }
-    }
-
-    [Fact]
     public void LoadFromPath_ExpandsEnvironmentVariablesInIconPath()
     {
         // Arrange
+        var scriptsDir = Path.Combine(_testDirectory, "Scripts");
+        Directory.CreateDirectory(scriptsDir);
+
         var testEnvVar = "RIGHTCLICKPS_ICON_PATH";
         var testPath = Path.Combine(_testDirectory, "icon.ico");
 
@@ -247,6 +216,7 @@ public class ConfigLoaderTests : IDisposable
         {
             var json = $$"""
             {
+                "scriptsPath": "{{scriptsDir.Replace("\\", "\\\\")}}",
                 "iconPath": "%{{testEnvVar}}%\\icon.ico"
             }
             """;
@@ -314,27 +284,6 @@ public class ConfigLoaderTests : IDisposable
     }
 
     [Fact]
-    public void LoadFromPath_RelativeSystemScriptsPath_ResolvesRelativeToConfigFile()
-    {
-        // Arrange
-        var json = """
-        {
-            "systemScriptsPath": "./MySystem"
-        }
-        """;
-        File.WriteAllText(_testConfigPath, json);
-
-        var loader = new ConfigLoader();
-
-        // Act
-        var config = loader.LoadFromPath(_testConfigPath);
-
-        // Assert
-        var expectedPath = Path.Combine(_testDirectory, "MySystem");
-        Assert.Equal(expectedPath, config.SystemScriptsPath);
-    }
-
-    [Fact]
     public void LoadFromPath_NullScriptsPath_DoesNotThrow()
     {
         // Arrange
@@ -382,8 +331,12 @@ public class ConfigLoaderTests : IDisposable
     public void LoadFromPath_MaxDepthTooLow_ClampsToMinimum()
     {
         // Arrange
-        var json = """
+        var scriptsDir = Path.Combine(_testDirectory, "Scripts");
+        Directory.CreateDirectory(scriptsDir);
+
+        var json = $$"""
         {
+            "scriptsPath": "{{scriptsDir.Replace("\\", "\\\\")}}",
             "maxDepth": 0
         }
         """;
@@ -402,8 +355,12 @@ public class ConfigLoaderTests : IDisposable
     public void LoadFromPath_MaxDepthNegative_ClampsToMinimum()
     {
         // Arrange
-        var json = """
+        var scriptsDir = Path.Combine(_testDirectory, "Scripts");
+        Directory.CreateDirectory(scriptsDir);
+
+        var json = $$"""
         {
+            "scriptsPath": "{{scriptsDir.Replace("\\", "\\\\")}}",
             "maxDepth": -5
         }
         """;
@@ -422,8 +379,12 @@ public class ConfigLoaderTests : IDisposable
     public void LoadFromPath_MaxDepthTooHigh_ClampsToMaximum()
     {
         // Arrange
-        var json = """
+        var scriptsDir = Path.Combine(_testDirectory, "Scripts");
+        Directory.CreateDirectory(scriptsDir);
+
+        var json = $$"""
         {
+            "scriptsPath": "{{scriptsDir.Replace("\\", "\\\\")}}",
             "maxDepth": 100
         }
         """;

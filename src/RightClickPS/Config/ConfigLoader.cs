@@ -125,8 +125,7 @@ public class ConfigLoader
         return new AppConfig
         {
             MenuName = "PowerShell Scripts",
-            ScriptsPath = null,
-            SystemScriptsPath = "./SystemScripts",
+            ScriptsPath = "./Scripts",
             MaxDepth = 3,
             IconPath = null
         };
@@ -142,11 +141,6 @@ public class ConfigLoader
             config.ScriptsPath = Environment.ExpandEnvironmentVariables(config.ScriptsPath);
         }
 
-        if (!string.IsNullOrEmpty(config.SystemScriptsPath))
-        {
-            config.SystemScriptsPath = Environment.ExpandEnvironmentVariables(config.SystemScriptsPath);
-        }
-
         if (!string.IsNullOrEmpty(config.IconPath))
         {
             config.IconPath = Environment.ExpandEnvironmentVariables(config.IconPath);
@@ -158,10 +152,9 @@ public class ConfigLoader
     /// </summary>
     private static void ValidateConfig(AppConfig config, string configPath)
     {
-        // Validate scriptsPath exists if provided
+        // Resolve scriptsPath relative to config file directory
         if (!string.IsNullOrEmpty(config.ScriptsPath))
         {
-            // Resolve relative paths from the config file directory
             var resolvedPath = ResolvePathRelativeToConfig(config.ScriptsPath, configPath);
 
             if (!Directory.Exists(resolvedPath))
@@ -170,14 +163,7 @@ public class ConfigLoader
                     $"Scripts path does not exist: {resolvedPath}");
             }
 
-            // Update to the resolved absolute path
             config.ScriptsPath = resolvedPath;
-        }
-
-        // Resolve systemScriptsPath relative to config file directory
-        if (!string.IsNullOrEmpty(config.SystemScriptsPath))
-        {
-            config.SystemScriptsPath = ResolvePathRelativeToConfig(config.SystemScriptsPath, configPath);
         }
 
         // Resolve iconPath relative to config file directory if provided

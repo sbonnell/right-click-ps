@@ -16,8 +16,7 @@ public class AppConfigTests
 
         // Assert
         Assert.Equal("PowerShell Scripts", config.MenuName);
-        Assert.Null(config.ScriptsPath);
-        Assert.Equal("./SystemScripts", config.SystemScriptsPath);
+        Assert.Equal("./Scripts", config.ScriptsPath);
         Assert.Equal(3, config.MaxDepth);
         Assert.Null(config.IconPath);
     }
@@ -30,7 +29,6 @@ public class AppConfigTests
         {
             MenuName = "Test Menu",
             ScriptsPath = "C:\\Scripts",
-            SystemScriptsPath = "./System",
             MaxDepth = 5,
             IconPath = "C:\\icon.ico"
         };
@@ -41,7 +39,6 @@ public class AppConfigTests
         // Assert
         Assert.Contains("\"menuName\":", json);
         Assert.Contains("\"scriptsPath\":", json);
-        Assert.Contains("\"systemScriptsPath\":", json);
         Assert.Contains("\"maxDepth\":", json);
         Assert.Contains("\"iconPath\":", json);
     }
@@ -54,7 +51,6 @@ public class AppConfigTests
         {
             "menuName": "Custom Scripts",
             "scriptsPath": "D:\\MyScripts",
-            "systemScriptsPath": "./CustomSystem",
             "maxDepth": 10,
             "iconPath": "D:\\menu.ico"
         }
@@ -67,7 +63,6 @@ public class AppConfigTests
         Assert.NotNull(config);
         Assert.Equal("Custom Scripts", config.MenuName);
         Assert.Equal("D:\\MyScripts", config.ScriptsPath);
-        Assert.Equal("./CustomSystem", config.SystemScriptsPath);
         Assert.Equal(10, config.MaxDepth);
         Assert.Equal("D:\\menu.ico", config.IconPath);
     }
@@ -89,7 +84,6 @@ public class AppConfigTests
         Assert.NotNull(config);
         Assert.Equal("PowerShell Scripts", config.MenuName);
         Assert.Equal("C:\\Scripts", config.ScriptsPath);
-        Assert.Equal("./SystemScripts", config.SystemScriptsPath);
         Assert.Equal(3, config.MaxDepth);
         Assert.Null(config.IconPath);
     }
@@ -123,7 +117,6 @@ public class AppConfigTests
         {
             MenuName = "RoundTrip Test",
             ScriptsPath = "E:\\Scripts\\Test",
-            SystemScriptsPath = "./SystemTest",
             MaxDepth = 7,
             IconPath = "E:\\icon.ico"
         };
@@ -136,7 +129,6 @@ public class AppConfigTests
         Assert.NotNull(deserialized);
         Assert.Equal(original.MenuName, deserialized.MenuName);
         Assert.Equal(original.ScriptsPath, deserialized.ScriptsPath);
-        Assert.Equal(original.SystemScriptsPath, deserialized.SystemScriptsPath);
         Assert.Equal(original.MaxDepth, deserialized.MaxDepth);
         Assert.Equal(original.IconPath, deserialized.IconPath);
     }
@@ -153,8 +145,7 @@ public class AppConfigTests
         // Assert
         Assert.NotNull(config);
         Assert.Equal("PowerShell Scripts", config.MenuName);
-        Assert.Null(config.ScriptsPath);
-        Assert.Equal("./SystemScripts", config.SystemScriptsPath);
+        Assert.Equal("./Scripts", config.ScriptsPath);
         Assert.Equal(3, config.MaxDepth);
         Assert.Null(config.IconPath);
     }

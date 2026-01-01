@@ -14,17 +14,11 @@ public class AppConfig
     public string MenuName { get; set; } = "PowerShell Scripts";
 
     /// <summary>
-    /// Path to the user scripts repository folder.
+    /// Path to the scripts folder.
     /// Environment variables are expanded at load time.
     /// </summary>
     [JsonPropertyName("scriptsPath")]
-    public string? ScriptsPath { get; set; }
-
-    /// <summary>
-    /// Path to built-in system scripts (relative to app directory).
-    /// </summary>
-    [JsonPropertyName("systemScriptsPath")]
-    public string SystemScriptsPath { get; set; } = "./SystemScripts";
+    public string ScriptsPath { get; set; } = "./Scripts";
 
     /// <summary>
     /// Maximum folder depth for submenu generation.

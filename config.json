@@ -1,7 +1,6 @@
 {
   "menuName": "Stu Helpers",
-  "scriptsPath": "./ExampleScripts",
-  "systemScriptsPath": "./SystemScripts",
+  "scriptsPath": "./Scripts",
   "maxDepth": 3,
   "iconPath": "./stu-icon.ico"
 }

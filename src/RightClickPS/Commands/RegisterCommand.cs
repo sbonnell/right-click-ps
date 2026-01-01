@@ -14,7 +14,7 @@ namespace RightClickPS.Commands;
 ///
 /// The command will:
 /// 1. Load configuration from config.json
-/// 2. Discover scripts from user and system scripts folders
+/// 2. Discover scripts from the scripts folder
 /// 3. Register context menu entries in the Windows registry
 /// 4. Report results to the user
 /// </remarks>
@@ -65,8 +65,7 @@ public class RegisterCommand
             {
                 config = _configLoader.Load();
                 WriteInfo($"  Menu name: {config.MenuName}");
-                WriteInfo($"  Scripts path: {config.ScriptsPath ?? "(not configured)"}");
-                WriteInfo($"  System scripts path: {config.SystemScriptsPath ?? "(not configured)"}");
+                WriteInfo($"  Scripts path: {config.ScriptsPath}");
                 WriteInfo($"  Max depth: {config.MaxDepth}");
             }
             catch (ConfigurationException ex)
@@ -80,7 +79,6 @@ public class RegisterCommand
             WriteInfo("Discovering scripts...");
             var menuRoot = _scriptDiscovery.DiscoverScripts(
                 config.ScriptsPath,
-                config.SystemScriptsPath,
                 config.MaxDepth);
 
             var scriptCount = ScriptDiscovery.CountScripts(menuRoot);

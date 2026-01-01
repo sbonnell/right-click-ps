@@ -180,7 +180,7 @@ public class ScriptDiscoveryTests
     public void DiscoverScripts_WithNullPaths_ReturnsEmptyRoot()
     {
         // Act
-        var root = _discovery.DiscoverScripts(null, null, 3);
+        var root = _discovery.DiscoverScripts(null, 3);
 
         // Assert
         Assert.NotNull(root);
@@ -194,7 +194,7 @@ public class ScriptDiscoveryTests
         var nonExistentPath = @"C:\NonExistent\Path\That\Does\Not\Exist\" + Guid.NewGuid().ToString();
 
         // Act
-        var root = _discovery.DiscoverScripts(nonExistentPath, null, 3);
+        var root = _discovery.DiscoverScripts(nonExistentPath, 3);
 
         // Assert
         Assert.NotNull(root);
@@ -210,7 +210,7 @@ public class ScriptDiscoveryTests
         try
         {
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.NotNull(root);
@@ -233,7 +233,7 @@ public class ScriptDiscoveryTests
             CreateScript(tempDir, "TestScript.ps1", "@Name: Test Script");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.Single(root.Children);
@@ -259,7 +259,7 @@ public class ScriptDiscoveryTests
             CreateScript(tempDir, "Gamma.ps1", "@Name: Gamma Script");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.Equal(3, root.Children.Count);
@@ -284,7 +284,7 @@ public class ScriptDiscoveryTests
             CreateScript(tempDir, "Middle.ps1", "@Name: Middle");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.Equal(3, root.Children.Count);
@@ -315,7 +315,7 @@ public class ScriptDiscoveryTests
             CreateScript(subDir, "Nested.ps1", "@Name: Nested Script");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.Single(root.Children);
@@ -345,7 +345,7 @@ public class ScriptDiscoveryTests
             CreateScript(level2, "Deep.ps1", "@Name: Deep Script");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.Single(root.Children);
@@ -378,7 +378,7 @@ public class ScriptDiscoveryTests
             CreateScript(folder, "Test.ps1", "@Name: Test");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.Equal(2, root.Children.Count);
@@ -403,7 +403,7 @@ public class ScriptDiscoveryTests
             CreateScript(tempDir, "Script.ps1", "@Name: Script");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.Single(root.Children);
@@ -430,7 +430,7 @@ public class ScriptDiscoveryTests
             CreateScript(tempDir, "Visible.ps1", "@Name: Visible Script");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.Single(root.Children);
@@ -460,7 +460,7 @@ public class ScriptDiscoveryTests
             CreateScript(subDir, "Nested.ps1", "@Name: Nested Script");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 1);
+            var root = _discovery.DiscoverScripts(tempDir, 1);
 
             // Assert
             Assert.Single(root.Children);
@@ -488,7 +488,7 @@ public class ScriptDiscoveryTests
             CreateScript(level2, "Level2.ps1", "@Name: Level 2");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 2);
+            var root = _discovery.DiscoverScripts(tempDir, 2);
 
             // Assert
             // Should have folder for Level1 and Root script
@@ -523,7 +523,7 @@ public class ScriptDiscoveryTests
             CreateScript(level3, "Level3.ps1", "@Name: Level 3");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             // Should include Level1 -> Level2 -> Level2.ps1, but not Level3
@@ -556,8 +556,8 @@ public class ScriptDiscoveryTests
             CreateScript(subDir, "Nested.ps1", "@Name: Nested");
 
             // Act
-            var rootZero = _discovery.DiscoverScripts(tempDir, null, 0);
-            var rootNegative = _discovery.DiscoverScripts(tempDir, null, -1);
+            var rootZero = _discovery.DiscoverScripts(tempDir, 0);
+            var rootNegative = _discovery.DiscoverScripts(tempDir, -1);
 
             // Assert
             Assert.Single(rootZero.Children);
@@ -566,143 +566,6 @@ public class ScriptDiscoveryTests
         finally
         {
             CleanupTempDirectory(tempDir);
-        }
-    }
-
-    #endregion
-
-    #region System Scripts Merging Tests
-
-    [Fact]
-    public void DiscoverScripts_WithSystemScripts_AddsSystemFolder()
-    {
-        // Arrange
-        var userDir = CreateTempDirectory();
-        var systemDir = CreateTempDirectory();
-
-        try
-        {
-            CreateScript(userDir, "User.ps1", "@Name: User Script");
-
-            var systemSubDir = Path.Combine(systemDir, "_System");
-            Directory.CreateDirectory(systemSubDir);
-            CreateScript(systemSubDir, "Refresh.ps1", "@Name: Refresh");
-
-            // Act
-            var root = _discovery.DiscoverScripts(userDir, systemDir, 3);
-
-            // Assert
-            Assert.Equal(2, root.Children.Count);
-
-            var systemFolder = root.Children.FirstOrDefault(c => c.Name == "_System");
-            Assert.NotNull(systemFolder);
-            Assert.True(systemFolder.IsFolder);
-            Assert.Single(systemFolder.Children);
-            Assert.Equal("Refresh", systemFolder.Children[0].Name);
-        }
-        finally
-        {
-            CleanupTempDirectory(userDir);
-            CleanupTempDirectory(systemDir);
-        }
-    }
-
-    [Fact]
-    public void DiscoverScripts_WithBothUserAndSystemScripts_MergesCorrectly()
-    {
-        // Arrange
-        var userDir = CreateTempDirectory();
-        var systemDir = CreateTempDirectory();
-
-        try
-        {
-            // User scripts
-            CreateScript(userDir, "Alpha.ps1", "@Name: Alpha");
-            var userImages = Path.Combine(userDir, "Images");
-            Directory.CreateDirectory(userImages);
-            CreateScript(userImages, "Convert.ps1", "@Name: Convert");
-
-            // System scripts
-            var systemSub = Path.Combine(systemDir, "_System");
-            Directory.CreateDirectory(systemSub);
-            CreateScript(systemSub, "Refresh.ps1", "@Name: Refresh");
-
-            // Act
-            var root = _discovery.DiscoverScripts(userDir, systemDir, 3);
-
-            // Assert
-            // Should have: _System folder, Images folder, Alpha script
-            Assert.Equal(3, root.Children.Count);
-
-            Assert.True(root.Children.Any(c => c.IsFolder && c.Name == "_System"));
-            Assert.True(root.Children.Any(c => c.IsFolder && c.Name == "Images"));
-            Assert.True(root.Children.Any(c => c.IsScript && c.Name == "Alpha"));
-        }
-        finally
-        {
-            CleanupTempDirectory(userDir);
-            CleanupTempDirectory(systemDir);
-        }
-    }
-
-    [Fact]
-    public void DiscoverScripts_SystemScriptsOnly_WorksCorrectly()
-    {
-        // Arrange
-        var systemDir = CreateTempDirectory();
-
-        try
-        {
-            var systemSub = Path.Combine(systemDir, "_System");
-            Directory.CreateDirectory(systemSub);
-            CreateScript(systemSub, "Refresh.ps1", "@Name: Refresh");
-            CreateScript(systemSub, "Config.ps1", "@Name: Config");
-
-            // Act
-            var root = _discovery.DiscoverScripts(null, systemDir, 3);
-
-            // Assert
-            Assert.Single(root.Children);
-            Assert.True(root.Children[0].IsFolder);
-            Assert.Equal("_System", root.Children[0].Name);
-            Assert.Equal(2, root.Children[0].Children.Count);
-        }
-        finally
-        {
-            CleanupTempDirectory(systemDir);
-        }
-    }
-
-    [Fact]
-    public void DiscoverScripts_MergeDuplicateFolders_CombinesChildren()
-    {
-        // Arrange
-        var userDir = CreateTempDirectory();
-        var systemDir = CreateTempDirectory();
-
-        try
-        {
-            // Both user and system have a "Shared" folder
-            var userShared = Path.Combine(userDir, "Shared");
-            var systemShared = Path.Combine(systemDir, "Shared");
-            Directory.CreateDirectory(userShared);
-            Directory.CreateDirectory(systemShared);
-            CreateScript(userShared, "UserScript.ps1", "@Name: User Script");
-            CreateScript(systemShared, "SystemScript.ps1", "@Name: System Script");
-
-            // Act
-            var root = _discovery.DiscoverScripts(userDir, systemDir, 3);
-
-            // Assert
-            Assert.Single(root.Children);
-            Assert.True(root.Children[0].IsFolder);
-            Assert.Equal("Shared", root.Children[0].Name);
-            Assert.Equal(2, root.Children[0].Children.Count);
-        }
-        finally
-        {
-            CleanupTempDirectory(userDir);
-            CleanupTempDirectory(systemDir);
         }
     }
 
@@ -724,7 +587,7 @@ public class ScriptDiscoveryTests
             Directory.CreateDirectory(subDir);
             CreateScript(subDir, "Script3.ps1", "@Name: Script 3");
 
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Act
             var count = ScriptDiscovery.CountScripts(root);
@@ -755,7 +618,7 @@ public class ScriptDiscoveryTests
             CreateScript(nested, "S2.ps1", "@Name: S2");
             CreateScript(folder2, "S3.ps1", "@Name: S3");
 
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Act
             var count = ScriptDiscovery.CountFolders(root);
@@ -819,7 +682,7 @@ public class ScriptDiscoveryTests
             File.WriteAllText(Path.Combine(tempDir, "Full.ps1"), content);
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.Single(root.Children);
@@ -849,7 +712,7 @@ public class ScriptDiscoveryTests
             File.WriteAllText(Path.Combine(tempDir, "NoMetadata.ps1"), "# Just a script");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.Single(root.Children);
@@ -873,7 +736,7 @@ public class ScriptDiscoveryTests
             CreateScript(tempDir, "TestScript.ps1", "@Name: Test");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.Single(root.Children);
@@ -898,7 +761,7 @@ public class ScriptDiscoveryTests
             CreateScript(subDir, "Nested.ps1", "@Name: Nested");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             var folder = root.Children.First(c => c.IsFolder);
@@ -928,7 +791,7 @@ public class ScriptDiscoveryTests
             File.WriteAllText(Path.Combine(tempDir, "script.bat"), "@echo off");
 
             // Act
-            var root = _discovery.DiscoverScripts(tempDir, null, 3);
+            var root = _discovery.DiscoverScripts(tempDir, 3);
 
             // Assert
             Assert.Single(root.Children);
@@ -948,7 +811,7 @@ public class ScriptDiscoveryTests
         var discovery = new ScriptDiscovery(parser);
 
         // Act
-        var root = discovery.DiscoverScripts(null, null, 3);
+        var root = discovery.DiscoverScripts(null, 3);
 
         // Assert
         Assert.NotNull(root);

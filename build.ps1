@@ -29,11 +29,8 @@ Get-ChildItem $tempPublish -Exclude "RightClickPS.exe" | Copy-Item -Destination 
 # Copy resources to RightClickPS subfolder
 Write-Host "  Copying resources..." -ForegroundColor Gray
 Copy-Item "$srcDir\config.json" $resourceDir -Force
-if (Test-Path "$srcDir\ExampleScripts") {
-    Copy-Item "$srcDir\ExampleScripts" "$resourceDir\ExampleScripts" -Recurse -Force
-}
-if (Test-Path "$srcDir\SystemScripts") {
-    Copy-Item "$srcDir\SystemScripts" "$resourceDir\SystemScripts" -Recurse -Force
+if (Test-Path "$srcDir\Scripts") {
+    Copy-Item "$srcDir\Scripts" "$resourceDir\Scripts" -Recurse -Force
 }
 
 # Copy icon files

@@ -41,9 +41,9 @@ Scripts use block comment headers:
 ```json
 {
   "menuName": "PowerShell Scripts",
-  "scriptsPath": "C:\\Scripts",
-  "systemScriptsPath": "./SystemScripts",
-  "maxDepth": 3
+  "scriptsPath": "./Scripts",
+  "maxDepth": 3,
+  "iconPath": "./icon.ico"
 }
 ```
 

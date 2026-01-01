@@ -644,8 +644,7 @@ Write-Host 'Hello from {name}'
 
                 WriteInfo("Loading configuration...");
                 WriteInfo($"  Menu name: {config.MenuName}");
-                WriteInfo($"  Scripts path: {config.ScriptsPath ?? "(not configured)"}");
-                WriteInfo($"  System scripts path: {config.SystemScriptsPath ?? "(not configured)"}");
+                WriteInfo($"  Scripts path: {config.ScriptsPath}");
                 WriteInfo($"  Max depth: {config.MaxDepth}");
 
                 WriteInfo("");
@@ -660,7 +659,6 @@ Write-Host 'Hello from {name}'
 
                 var menuRoot = scriptDiscovery.DiscoverScripts(
                     config.ScriptsPath,
-                    config.SystemScriptsPath,
                     config.MaxDepth);
 
                 var scriptCount = ScriptDiscovery.CountScripts(menuRoot);
