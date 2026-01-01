@@ -317,8 +317,8 @@
       "description": "Create ConfigLoader to read and validate config.json from app directory. Expand environment variables in paths. Provide sensible defaults.",
       "files": ["src/RightClickPS/Config/ConfigLoader.cs"],
       "dependencies": [2],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 4,
@@ -437,8 +437,8 @@
       "description": "Create PowerShell script that reads config.json and opens scriptsPath in Windows Explorer.",
       "files": ["SystemScripts/_System/Open Scripts Folder.ps1"],
       "dependencies": [2],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 16,
