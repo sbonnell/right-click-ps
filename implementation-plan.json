@@ -377,8 +377,8 @@
       "description": "Create ContextMenuRegistry to create/delete cascading menu registry entries. Build hierarchical submenus from MenuNode structure. Handle both files and folders registration.",
       "files": ["src/RightClickPS/Registry/ContextMenuRegistry.cs"],
       "dependencies": [6, 8],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 10,
