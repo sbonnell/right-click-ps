@@ -470,8 +470,8 @@
         "ExampleScripts/Files/Copy Path.ps1"
       ],
       "dependencies": [5],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 19,
