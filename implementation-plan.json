@@ -447,8 +447,8 @@
       "description": "Create PowerShell script that opens config.json in the default text editor.",
       "files": ["SystemScripts/_System/Open Config.ps1"],
       "dependencies": [2],
-      "completed": false,
-      "tested": false
+      "completed": true,
+      "tested": true
     },
     {
       "id": 17,
