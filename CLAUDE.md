@@ -57,9 +57,10 @@ dotnet publish src/RightClickPS/RightClickPS.csproj -c Release -r win-x64
 ## CLI Usage
 
 ```bash
-RightClickPS.exe register      # Create context menu entries from scripts folder
-RightClickPS.exe unregister    # Remove all context menu entries
-RightClickPS.exe execute "<script>" "<file1>" "<file2>" ...  # Run a script
+RightClickPS.exe register                                    # Create context menu entries from scripts folder
+RightClickPS.exe unregister                                  # Remove all context menu entries
+RightClickPS.exe execute "<script>" "<file1>" "<file2>" ...  # Run a script with selected files
+RightClickPS.exe help                                        # Show usage information
 ```
 
 ## Registry Paths
