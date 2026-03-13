@@ -195,6 +195,9 @@ namespace AudioControlV2
         private static readonly Guid CLSID_MMDeviceEnumerator = new Guid("BCDE0395-E52F-467C-8E3D-C4579291692E");
         private static readonly Guid IID_IAudioEndpointVolume = new Guid("5CDF2C82-841E-4546-9722-0CF74078229A");
 
+        [DllImport("Ole32.dll")]
+        private static extern int PropVariantClear(ref PropVariant pvar);
+
         // PKEY_Device_FriendlyName
         private static readonly PropertyKey FriendlyNameKey = new PropertyKey
         {
@@ -223,9 +226,9 @@ namespace AudioControlV2
             }
             finally
             {
-                // Free LPWSTR if needed
-                if (pv.vt == 31 && pv.data1 != IntPtr.Zero)
-                    Marshal.FreeCoTaskMem(pv.data1);
+                // PROPVARIANT memory must be cleaned up with PropVariantClear.
+                PropVariantClear(ref pv);
+                Marshal.ReleaseComObject(store);
             }
         }
 
