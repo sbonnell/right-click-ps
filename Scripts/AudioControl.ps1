@@ -77,7 +77,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 
-namespace AudioControl
+namespace AudioControlV2
 {
     // EDataFlow
     public enum DataFlow { Render = 0, Capture = 1, All = 2 }
@@ -344,13 +344,13 @@ function Get-AudioDevices {
     $devices = [System.Collections.Generic.List[object]]::new()
 
     $flows = switch ($FlowFilter) {
-        'Playback'  { @([AudioControl.DataFlow]::Render) }
-        'Recording' { @([AudioControl.DataFlow]::Capture) }
-        default     { @([AudioControl.DataFlow]::Render, [AudioControl.DataFlow]::Capture) }
+        'Playback'  { @([AudioControlV2.DataFlow]::Render) }
+        'Recording' { @([AudioControlV2.DataFlow]::Capture) }
+        default     { @([AudioControlV2.DataFlow]::Render, [AudioControlV2.DataFlow]::Capture) }
     }
 
     foreach ($flow in $flows) {
-        $list = [AudioControl.CoreAudioHelper]::EnumerateDevices($flow)
+        $list = [AudioControlV2.CoreAudioHelper]::EnumerateDevices($flow)
         foreach ($d in $list) {
             $d.Flow = $flow
             $devices.Add($d)
@@ -400,7 +400,7 @@ function Format-DeviceRow {
         default      { 'Gray' }
     }
 
-    $volStr = if ($Device.State -eq [AudioControl.DeviceState]::Active) {
+    $volStr = if ($Device.State -eq [AudioControlV2.DeviceState]::Active) {
         $muteStr = if ($Device.IsMuted) { ' [MUTED]' } else { '' }
         "$($Device.VolumePercent)%$muteStr"
     } else {
@@ -438,8 +438,8 @@ switch ($PSCmdlet.ParameterSetName) {
         Write-Host "  $('=' * 70)" -ForegroundColor DarkGray
 
         $typeMap = @{
-            [AudioControl.DataFlow]::Render  = 'Playback'
-            [AudioControl.DataFlow]::Capture = 'Recording'
+            [AudioControlV2.DataFlow]::Render  = 'Playback'
+            [AudioControlV2.DataFlow]::Capture = 'Recording'
         }
 
         $all = Get-AudioDevices -FlowFilter $Type
@@ -459,13 +459,13 @@ switch ($PSCmdlet.ParameterSetName) {
         $device = Find-Device -Query $SetVolume -FlowFilter $Type
         if (-not $device) { exit 1 }
 
-        if ($device.State -ne [AudioControl.DeviceState]::Active) {
+        if ($device.State -ne [AudioControlV2.DeviceState]::Active) {
             Write-Host "ERROR: Device '$($device.Name)' is not active (State: $($device.State))." -ForegroundColor Red
             exit 1
         }
 
         $scalar = $Volume / 100.0
-        $ok = [AudioControl.CoreAudioHelper]::SetVolume($device.Id, [float]$scalar)
+        $ok = [AudioControlV2.CoreAudioHelper]::SetVolume($device.Id, [float]$scalar)
 
         if ($ok) {
             Write-Host "OK  Volume set to $Volume% on '$($device.Name)'" -ForegroundColor Green
@@ -479,12 +479,12 @@ switch ($PSCmdlet.ParameterSetName) {
         $device = Find-Device -Query $Mute -FlowFilter $Type
         if (-not $device) { exit 1 }
 
-        if ($device.State -ne [AudioControl.DeviceState]::Active) {
+        if ($device.State -ne [AudioControlV2.DeviceState]::Active) {
             Write-Host "ERROR: Device '$($device.Name)' is not active." -ForegroundColor Red
             exit 1
         }
 
-        $ok = [AudioControl.CoreAudioHelper]::SetMute($device.Id, $true)
+        $ok = [AudioControlV2.CoreAudioHelper]::SetMute($device.Id, $true)
         if ($ok) {
             Write-Host "OK  Muted '$($device.Name)'" -ForegroundColor Green
         } else {
@@ -497,12 +497,12 @@ switch ($PSCmdlet.ParameterSetName) {
         $device = Find-Device -Query $Unmute -FlowFilter $Type
         if (-not $device) { exit 1 }
 
-        if ($device.State -ne [AudioControl.DeviceState]::Active) {
+        if ($device.State -ne [AudioControlV2.DeviceState]::Active) {
             Write-Host "ERROR: Device '$($device.Name)' is not active." -ForegroundColor Red
             exit 1
         }
 
-        $ok = [AudioControl.CoreAudioHelper]::SetMute($device.Id, $false)
+        $ok = [AudioControlV2.CoreAudioHelper]::SetMute($device.Id, $false)
         if ($ok) {
             Write-Host "OK  Unmuted '$($device.Name)'" -ForegroundColor Green
         } else {
